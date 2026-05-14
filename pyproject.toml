@@ -45,9 +45,8 @@ dev = [
 Homepage = "https://github.com/yourname/methylcycle"
 Repository = "https://github.com/yourname/methylcycle"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["methylcycle*"]
+[tool.setuptools]
+packages = ["methylcycle"]
 
 [tool.setuptools.package-data]
 methylcycle = [
