@@ -50,7 +50,14 @@ where = ["."]
 include = ["methylcycle*"]
 
 [tool.setuptools.package-data]
-methylcycle = ["data/*.txt", "data/models/.gitkeep"]
+methylcycle = [
+    "data/*.txt",
+    "data/models/*.joblib",   
+    "data/models/*.txt",     
+    "data/example_datasets/README.md",
+    "data/example_datasets/single_cell_mESC/*.parquet",
+    "data/example_datasets/bulk_hepatocytes/*.parquet",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

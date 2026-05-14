@@ -10,6 +10,13 @@ methylcycle/data/ChromHMM_Regions.txt
 methylcycle/data/RT_Regions.txt
 methylcycle/data/__init__.py
 methylcycle/data/models/.gitkeep
+methylcycle/data/models/chromhmm_entropy_model.joblib
+methylcycle/data/models/chromhmm_mean_model.joblib
+methylcycle/data/models/chromhmm_region_order.txt
+methylcycle/data/models/chromhmm_region_order_entropy.txt
+methylcycle/data/models/rt_entropy_model.joblib
+methylcycle/data/models/rt_mean_model.joblib
+methylcycle/data/models/rt_mean_pca.joblib
 methylcycle/models/__init__.py
 methylcycle/models/datasets.py
 methylcycle/models/feature_extraction.py
