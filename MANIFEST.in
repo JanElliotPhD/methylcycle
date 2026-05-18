@@ -1,0 +1,3 @@
+recursive-include methylcycle/models/data *.parquet
+recursive-include methylcycle/models/data *.joblib
+recursive-include methylcycle/models/data *.txt
