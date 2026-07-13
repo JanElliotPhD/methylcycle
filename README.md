@@ -1,6 +1,6 @@
 # MethylCycle
 
-A bioinformatics Python library for DNA methylation analysis and modeling.
+A bioinformatics Python library for cell cycle prediction based in DNA methylation .
 
 ## Installation
 
