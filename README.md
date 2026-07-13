@@ -7,6 +7,8 @@ A bioinformatics Python library for cell cycle prediction based in DNA methylati
 ```bash
 pip install methylcycle
 
+or
+
 pip install git+https://github.com/JanElliotPhD/methylcycle.git
 
 ```
