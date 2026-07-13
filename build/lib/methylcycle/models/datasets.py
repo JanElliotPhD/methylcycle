@@ -46,7 +46,7 @@ from typing import Dict, List, Tuple
 # Dataset registry
 # ---------------------------------------------------------------------------
 
-_DATA_DIR = pathlib.Path(__file__).parent / "data" / "example_datasets"
+_DATA_DIR = pathlib.Path(__file__).parent.parent / "data" / "example_datasets"
 
 _DATASETS: Dict[str, dict] = {
     "single_cell_mESC": {

@@ -2,6 +2,7 @@ Metadata-Version: 2.4
 Name: methylcycle
 Version: 0.1.0
 Summary: A bioinformatics library for DNA methylation analysis and modeling
+Author: Jan Elliot Gonzalez and Irene Hernando Herraez
 Author-email: Jan Elliot Gonzalez and Irene Hernando Herraez <elgo3000@gmail.com>
 License: MIT
 Project-URL: Homepage, https://github.com/yourname/methylcycle

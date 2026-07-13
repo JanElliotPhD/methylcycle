@@ -1,5 +1,8 @@
+MANIFEST.in
 README.md
 pyproject.toml
+setup.cfg
+setup.py
 methylcycle/__init__.py
 methylcycle.egg-info/PKG-INFO
 methylcycle.egg-info/SOURCES.txt
