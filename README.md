@@ -40,22 +40,30 @@ Input files (BED / CSV / Parquet)
 ## Quick Start
 
 ```python
+import methylcycle.models.paths as mp
 from methylcycle import predict
 from methylcycle.models.maps import MapType
 from methylcycle.models.feature_extraction import Metric
+from methylcycle.models.datasets import list_datasets, load_dataset
 
-# Set model paths (once)
-import methylcycle.models.paths as mp
-mp.RT_MEAN_PCA   = "/path/to/pca_rt.joblib"
-mp.RT_MEAN_MODEL = "/path/to/clf_rt_mean.joblib"
+# Ver datasets disponibles
+list_datasets()
+# ['single_cell_mESC', 'bulk_hepatocytes']
 
-# Run full pipeline
-results = predict(
-    files=["sample1.parquet", "sample2.parquet"],
+# Obtener rutas y nombres
+files, names = load_dataset("single_cell_mESC")
+
+results_mean = predict(
+    files=files,
     map_type=MapType.RT,
     metric=Metric.MEAN,
+    sep=",",
+    min_cpgs = 100000
 )
-print(results)
+
+results_mean.columns = ['prob_G1', 'prob_S', 'prob_G2M']
+
+print(results_mean)
 ```
 
 ## Step-by-Step Usage
