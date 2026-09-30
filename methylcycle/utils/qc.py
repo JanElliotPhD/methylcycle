@@ -77,10 +77,28 @@ def passes_qc(
     KeyError
         If the required count columns are not present in *df*.
     """
+        # Percentage-only schema: every row with a value is a covered CpG.
+    # The README documents {Chromosome, Position, Methylation Percentage}
+    # as a supported input schema, so handle it before requiring counts.
+    PCT_COL = "Methylation Percentage"
+    if meth_col not in df.columns and PCT_COL in df.columns:
+        covered = int(df[PCT_COL].notna().sum())
+        passed = covered >= min_cpgs
+        return QCReport(
+            passed=passed,
+            covered_cpgs=covered,
+            min_required=min_cpgs,
+            message=(
+                f"{'PASS' if passed else 'FAIL'}: {covered:,} covered CpGs "
+                f"(minimum {min_cpgs:,}) [percentage schema]"
+            ),
+        )
+
     for col in (meth_col, unmeth_col):
         if col not in df.columns:
             raise KeyError(
-                f"Column '{col}' not found. "
+                f"Column '{col}' not found. Expected either "
+                f"'{meth_col}'/'{unmeth_col}' or '{PCT_COL}'. "
                 f"Available columns: {df.columns.tolist()}"
             )
 
