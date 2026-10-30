@@ -25,3 +25,7 @@ from methylcycle.utils.qc import passes_qc                     # noqa: F401
 from methylcycle.models.feature_extraction import extract_features  # noqa: F401
 from methylcycle.models.predict import predict                  # noqa: F401
 from methylcycle.models.datasets import list_datasets, load_dataset
+from methylcycle.models.maps import MapType                          # noqa: F401
+from methylcycle.models.cascade import (                             # noqa: F401
+    build_cascade, save_cascade, load_cascade, predict_cascade_files, predict_from_matrices,
+)

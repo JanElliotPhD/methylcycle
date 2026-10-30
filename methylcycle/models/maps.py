@@ -23,11 +23,16 @@ class MapType(str, enum.Enum):
         Replication-timing regions (shipped as ``data/RT_Regions.txt``).
     CHROMHMM:
         ChromHMM chromatin-state regions (shipped as ``data/ChromHMM_Regions.txt``).
+    IZ:
+        Replication initiation zones (shipped as ``data/IZ_Regions.txt``), each
+        with a replication-timing class (early / mid / late) in
+        ``data/IZ_Classes.tsv``. Used by the RT + IZ cascade.
     CUSTOM:
         User-supplied region list (file path or Python list).
     """
     RT = "RT"
     CHROMHMM = "ChromHMM"
+    IZ = "IZ"
     CUSTOM = "custom"
 
 
@@ -39,7 +44,11 @@ _DATA_DIR = pathlib.Path(__file__).parent.parent / "data"
 _MAP_FILES = {
     MapType.RT: _DATA_DIR / "RT_Regions.txt",
     MapType.CHROMHMM: _DATA_DIR / "ChromHMM_Regions.txt",
+    MapType.IZ: _DATA_DIR / "IZ_Regions.txt",
 }
+
+IZ_CLASSES_FILE = _DATA_DIR / "IZ_Classes.tsv"
+"""Two tab-separated columns, ``region_id`` and ``clase`` (early / mid / late)."""
 
 
 def get_region_list(
@@ -93,3 +102,26 @@ def get_region_list(
     raise ValueError(
         "MapType.CUSTOM requires either 'custom_path' or 'custom_list'."
     )
+
+
+def get_iz_classes(path: str | pathlib.Path | None = None):
+    """Return a ``pandas.Series`` (index = IZ region id, value = early / mid / late).
+
+    Parameters
+    ----------
+    path:
+        Optional override of the built-in ``data/IZ_Classes.tsv``.
+    """
+    import pandas as pd
+
+    path = pathlib.Path(path or IZ_CLASSES_FILE)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"IZ class file not found: {path}. It must hold two tab-separated columns, "
+            "'region_id' (chr<N>-<start>-<end>) and 'clase' (early / mid / late)."
+        )
+    cls = pd.read_csv(path, sep="\t", dtype=str).set_index("region_id")["clase"]
+    bad = set(cls.unique()) - {"early", "mid", "late"}
+    if bad:
+        raise ValueError(f"Unexpected IZ classes in {path}: {sorted(bad)}")
+    return cls

@@ -30,6 +30,8 @@ dependencies = [
     "joblib>=1.1",
     "tqdm>=4.60",
     "pyarrow>=10.0",
+    "scikit-learn>=1.2",
+    "xgboost>=1.7",
 ]
 
 [project.optional-dependencies]
@@ -51,6 +53,7 @@ packages = ["methylcycle", "methylcycle.data", "methylcycle.models", "methylcycl
 [tool.setuptools.package-data]
 methylcycle = [
     "data/*.txt",
+    "data/*.tsv",
     "data/models/*.joblib",
     "data/models/*.txt",
     "data/example_datasets/README.md",

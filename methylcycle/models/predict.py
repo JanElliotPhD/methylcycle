@@ -51,6 +51,7 @@ def predict(
     custom_path: str | pathlib.Path | None = None,
     custom_list: List[str] | None = None,
     min_cpgs: int = 100_000,
+    run_qc: bool = True,
     # Model artefact overrides (use global paths if not set)
     pca_path: str | pathlib.Path | None = None,
     model_path: str | pathlib.Path | None = None,
@@ -75,6 +76,10 @@ def predict(
         Region source when ``map_type == MapType.CUSTOM``.
     min_cpgs:
         QC threshold — minimum covered CpG positions.
+    run_qc:
+        If ``False``, skip the QC step (every file is used). QC reads every
+        file once more before feature extraction, so skipping it roughly halves
+        the run time on large inputs.
     pca_path:
         Override the global PCA artefact path.
     model_path:
@@ -99,9 +104,12 @@ def predict(
         sample_names = [f.stem for f in files]
  
     # ── 1. QC filter ─────────────────────────────────────────────────────
-    passed_files, passed_names, qc_reports = _run_qc(
-        files, sample_names, min_cpgs=min_cpgs, sep=sep
-    )
+    if run_qc:
+        passed_files, passed_names, qc_reports = _run_qc(
+            files, sample_names, min_cpgs=min_cpgs, sep=sep
+        )
+    else:
+        passed_files, passed_names, qc_reports = list(files), list(sample_names), {}
     if not passed_files:
         raise RuntimeError("All samples failed QC. No samples to process.")
  

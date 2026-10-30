@@ -74,3 +74,10 @@ def test_missing_columns_raises(tmp_path):
     content = "Chromosome,Position\nchr1,1000\n"
     with pytest.raises(ValueError):
         load_methylation_file(_csv(content, tmp_path), sep=",")
+
+
+def test_pct_missing_values_dropped(tmp_path):
+    content = "Chromosome,Position,Methylation Percentage\nchr1,500,75.0\nchr1,600,\nchr1,700,0\n"
+    df = load_methylation_file(_csv(content, tmp_path), sep=",")
+    assert len(df) == 2                                   # the empty percentage is not read as 0 %
+    assert df[COL_PCT].tolist() == [0.75, 0.0]

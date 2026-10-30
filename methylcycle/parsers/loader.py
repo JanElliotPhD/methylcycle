@@ -212,11 +212,12 @@ def _normalise_columns(
         return out, True
 
     if pct is not None:
-        p = pd.to_numeric(df[pct], errors="coerce").fillna(0.0)
-        if p.max() > 1.0:
+        p = pd.to_numeric(df[pct], errors="coerce")
+        keep = p.notna()                     # a missing percentage is "no data", not 0 % methylation
+        if p[keep].max() > 1.0:              # 0-100 scale -> 0-1
             p = p / 100.0
         out[COL_PCT] = p.clip(0.0, 1.0)
-        return out, False
+        return out[keep.to_numpy()], False
 
     raise ValueError(
         "File must contain either (Count Methylated + Count Unmethylated) "

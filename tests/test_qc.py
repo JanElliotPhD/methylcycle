@@ -44,3 +44,17 @@ def test_missing_column_raises():
     df = pd.DataFrame({"Chromosome": ["chr1"], "Position": [1]})
     with pytest.raises(KeyError):
         passes_qc(df)
+
+
+def test_percentage_only_file_passes_qc():
+    df = pd.DataFrame({"Chromosome": ["chr1"] * 10, "Position": range(10),
+                       "Methylation Percentage": [0.0, 1.0] * 5})
+    report = passes_qc(df, min_cpgs=10)
+    assert report.passed is True
+    assert report.covered_cpgs == 10
+
+
+def test_percentage_missing_values_not_covered():
+    df = pd.DataFrame({"Chromosome": ["chr1"] * 4, "Position": range(4),
+                       "Methylation Percentage": [0.5, np.nan, 1.0, np.nan]})
+    assert passes_qc(df, min_cpgs=1).covered_cpgs == 2

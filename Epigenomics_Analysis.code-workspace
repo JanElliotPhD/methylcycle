@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "../../Epigenomics_Analysis"
+		},
+		{
+			"path": "../../MiniProyectos/Automatización Excel"
+		},
+		{
+			"path": "../../MiniProyectos/Automatizacion_Excel"
+		},
+		{
+			"path": "../../MiniProyectos/Generar_circuitos_electricos"
+		},
+		{
+			"path": "../../ReportAge"
+		},
+		{
+			"path": "../methylcycle_paper"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../../AccesCycle"
+		}
+	],
+	"settings": {}
+}

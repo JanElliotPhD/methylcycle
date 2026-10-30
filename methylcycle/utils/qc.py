@@ -4,8 +4,10 @@ methylcycle.utils.qc
 Quality-control check for a single methylation sample.
 
 A sample **passes** if it has at least ``min_cpgs`` (default 100 000)
-CpG positions covered by at least one read, i.e. positions where
-``Count Methylated + Count Unmethylated >= 1``.
+covered CpG positions:
+
+- count files: positions where ``Count Methylated + Count Unmethylated >= 1``;
+- percentage-only files: positions with a (non-missing) ``Methylation Percentage``.
 """
 
 from __future__ import annotations
@@ -54,6 +56,7 @@ def passes_qc(
     min_cpgs: int = MIN_COVERED_CPGS,
     meth_col: str = "Count Methylated",
     unmeth_col: str = "Count Unmethylated",
+    pct_col: str = "Methylation Percentage",
 ) -> QCReport:
     """Check whether a methylation DataFrame passes coverage QC.
 
@@ -66,6 +69,9 @@ def passes_qc(
         Default is 100 000.
     meth_col, unmeth_col:
         Column names for methylated / unmethylated counts.
+    pct_col:
+        Column name of the methylation percentage, used when the count
+        columns are absent (percentage-only files).
 
     Returns
     -------
@@ -75,35 +81,18 @@ def passes_qc(
     Raises
     ------
     KeyError
-        If the required count columns are not present in *df*.
+        If neither the count columns nor the percentage column are present.
     """
-        # Percentage-only schema: every row with a value is a covered CpG.
-    # The README documents {Chromosome, Position, Methylation Percentage}
-    # as a supported input schema, so handle it before requiring counts.
-    PCT_COL = "Methylation Percentage"
-    if meth_col not in df.columns and PCT_COL in df.columns:
-        covered = int(df[PCT_COL].notna().sum())
-        passed = covered >= min_cpgs
-        return QCReport(
-            passed=passed,
-            covered_cpgs=covered,
-            min_required=min_cpgs,
-            message=(
-                f"{'PASS' if passed else 'FAIL'}: {covered:,} covered CpGs "
-                f"(minimum {min_cpgs:,}) [percentage schema]"
-            ),
+    if meth_col in df.columns and unmeth_col in df.columns:
+        coverage = df[meth_col] + df[unmeth_col]
+        covered = int((coverage >= 1).sum())
+    elif pct_col in df.columns:
+        covered = int(df[pct_col].notna().sum())
+    else:
+        raise KeyError(
+            f"Neither count columns ('{meth_col}', '{unmeth_col}') nor a "
+            f"'{pct_col}' column found. Available columns: {df.columns.tolist()}"
         )
-
-    for col in (meth_col, unmeth_col):
-        if col not in df.columns:
-            raise KeyError(
-                f"Column '{col}' not found. Expected either "
-                f"'{meth_col}'/'{unmeth_col}' or '{PCT_COL}'. "
-                f"Available columns: {df.columns.tolist()}"
-            )
-
-    coverage = df[meth_col] + df[unmeth_col]
-    covered = int((coverage >= 1).sum())
     passed = covered >= min_cpgs
 
     if passed:

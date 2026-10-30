@@ -50,3 +50,11 @@ CHROMHMM_MEAN_MODEL: pathlib.Path = MODEL_DIR / "chromhmm_mean_model.joblib"
 
 CHROMHMM_ENTROPY_MODEL: pathlib.Path = MODEL_DIR / "chromhmm_entropy_model.joblib"
 """Trained classifier / regressor for ChromHMM + ENTROPY features."""
+
+# ---------------------------------------------------------------------------
+# RT + IZ cascade artefact (see methylcycle.models.cascade)
+# ---------------------------------------------------------------------------
+
+CASCADE_SVM_MODEL: pathlib.Path = MODEL_DIR / "cascade_svm.joblib"
+"""Two-stage cascade (stage 1: RT-domain methylation, G2M vs rest; stage 2: IZ contrast
+features, G1 / S / G2M) built with :func:`methylcycle.models.cascade.build_cascade`."""

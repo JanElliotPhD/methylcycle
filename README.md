@@ -28,7 +28,7 @@ Input files (BED / CSV / Parquet)
         ↓
    load_methylation_file()     ← normalise columns + chr prefix
         ↓
-      passes_qc()              ← ≥ 100k covered CpG positions
+      passes_qc()              ← ≥ 100k covered CpG positions (optional: run_qc=False)
         ↓
    extract_features()          ← RT or ChromHMM region map
         ↓
@@ -185,3 +185,71 @@ pytest
 ## License
 
 MIT
+
+
+## Percentage-only files
+
+Files with `Chromosome`, `Position` and `Methylation Percentage` (0–1 or 0–100) and no count
+columns are supported in every step, QC included. Each CpG counts as one call, so the coverage
+QC counts CpGs with a percentage, and rows with a missing percentage are dropped (they are not
+read as 0 % methylation).
+
+## Skipping QC
+
+QC reads every file once more before feature extraction. To skip it:
+
+```python
+results = predict(files=files, map_type=MapType.RT, metric=Metric.MEAN, run_qc=False)
+```
+
+## RT + IZ cascade (SVM/SVM) with optional domain-shift correction
+
+Two-stage model:
+
+1. **Stage 1** — G2M vs {G1, S} on per-domain methylation of the 1,435 RT domains.
+2. **Stage 2** — G1 / S / G2M on 9 contrast features between early, mid and late replication
+   initiation zones (IZs).
+
+```python
+from methylcycle import predict_cascade_files
+
+res = predict_cascade_files(files, correct=True, run_qc=False)
+# columns: prob_G1, prob_S, prob_G2M, stage1_prob_G2M, prediction
+```
+
+`correct=True` applies a dataset-level domain-shift correction to stage 1: for every RT domain,
+the dataset mean is replaced by the training mean (`x' = x - mean(dataset) + mean(training)`).
+No labels are used. It removes the baseline profile of a different cell type or protocol, but it
+assumes the phase mix of the dataset is not extreme (not all G1 or all G2M) and needs tens of
+cells; the prediction of a cell depends on the other cells passed together.
+
+### Files the cascade needs
+
+| file | content |
+|---|---|
+| `methylcycle/data/IZ_Regions.txt` | one IZ per line, `chr<N>-<start>-<end>` |
+| `methylcycle/data/IZ_Classes.tsv` | tab-separated `region_id` and `clase` (`early` / `mid` / `late`) |
+| `methylcycle/data/models/cascade_svm.joblib` | trained cascade (see below) |
+
+Create the two IZ files from the IZ table (`iz_meta`, with `Chromosome`, `start`, `end`, `clase`):
+
+```python
+ids = ("chr" + iz_meta["Chromosome"].astype(str).str.replace("^chr", "", regex=True)
+       + "-" + iz_meta["start"].astype(int).astype(str) + "-" + iz_meta["end"].astype(int).astype(str))
+open("methylcycle/data/IZ_Regions.txt", "w").write("\n".join(ids) + "\n")
+pd.DataFrame({"region_id": ids.to_numpy(), "clase": iz_meta["clase"].to_numpy()}).to_csv(
+    "methylcycle/data/IZ_Classes.tsv", sep="\t", index=False)
+```
+
+Build the cascade artefact from the training matrices (`X1`: cells × RT-domain rates in
+`train_keys` order, `X2`: cells × the 9 IZ features in `CIEGO9` order, `yv`: phases):
+
+```python
+from methylcycle import build_cascade, save_cascade
+art = build_cascade(X1, X2, yv, rt_regions=train_keys, model="SVM", center="mean", stage2_mode="3class")
+save_cascade(art)              # -> methylcycle/data/models/cascade_svm.joblib
+```
+
+The IZ features are computed with `methylcycle.models.iz_features.iz_contrast_features` (numpy
+only). Train `X2` with the same function, or with an equivalent one that does not go through the
+numexpr comparison bug of numexpr <= 2.10.2.
