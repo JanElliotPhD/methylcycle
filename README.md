@@ -219,9 +219,8 @@ res = predict_cascade_files(files, correct=True, run_qc=False)
 
 `correct=True` applies a dataset-level domain-shift correction to stage 1: for every RT domain,
 the dataset mean is replaced by the training mean (`x' = x - mean(dataset) + mean(training)`).
-No labels are used. It removes the baseline profile of a different cell type or protocol, but it
-assumes the phase mix of the dataset is not extreme (not all G1 or all G2M) and needs tens of
-cells; the prediction of a cell depends on the other cells passed together.
+No labels are used. It removes the baseline profile of a different cell type or protocol and needs a minimum of
+cells (5 or more cells); the prediction of a cell depends on the other cells passed together.
 
 ### Files the cascade needs
 
@@ -250,6 +249,4 @@ art = build_cascade(X1, X2, yv, rt_regions=train_keys, model="SVM", center="mean
 save_cascade(art)              # -> methylcycle/data/models/cascade_svm.joblib
 ```
 
-The IZ features are computed with `methylcycle.models.iz_features.iz_contrast_features` (numpy
-only). Train `X2` with the same function, or with an equivalent one that does not go through the
-numexpr comparison bug of numexpr <= 2.10.2.
+
